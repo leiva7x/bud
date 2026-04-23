@@ -1,42 +1,33 @@
-// src/components/Dashboard/RecentTransactions.tsx
-
 import React from 'react';
-import { Transaction } from '../../types';
-import { formatCurrency, formatDateShort } from '../../utils/formatting';
-import { CATEGORY_ICONS } from '../../utils/constants';
+import { useTransactionStore } from '../../store/transactionStore';
+import { formatDate, formatCurrency } from '../../utils/formatting';
 import './RecentTransactions.css';
 
-interface RecentTransactionsProps {
-  transactions: Transaction[];
-}
+const RecentTransactions: React.FC = () => {
+  const { transactions } = useTransactionStore();
+  
+  // Tomamos solo las últimas 5 transacciones
+  const recent = transactions.slice(0, 5);
 
-const RecentTransactions: React.FC<RecentTransactionsProps> = ({ transactions }) => {
   return (
-    <div className="recent-transactions">
-      <h3>Recent Transactions</h3>
-      
-      {transactions.length === 0 ? (
-        <p className="empty-message">No transactions yet</p>
+    <div className="recent-transactions-container">
+      <h3>Recent Activity</h3>
+      {recent.length === 0 ? (
+        <p className="empty-state">No transactions recorded yet.</p>
       ) : (
-        <ul className="transactions-list">
-          {transactions.map((transaction) => (
-            <li key={transaction.id} className="transaction-item">
-              <div className="transaction-left">
-                <span className="icon">
-                  {CATEGORY_ICONS[transaction.category] || '📌'}
-                </span>
-                <div className="transaction-info">
-                  <p className="description">{transaction.description}</p>
-                  <p className="date">{formatDateShort(transaction.date)}</p>
-                </div>
+        <div className="transaction-list">
+          {recent.map((t) => (
+            <div key={t.id} className="transaction-item">
+              <div className="transaction-info">
+                <span className="transaction-category">{t.category}</span>
+                <span className="transaction-date">{formatDate(t.date)}</span>
               </div>
-              <p className={`amount ${transaction.type === 'income' ? 'income' : 'expense'}`}>
-                {transaction.type === 'income' ? '+' : '-'}
-                {formatCurrency(transaction.amount)}
-              </p>
-            </li>
+              <span className={`transaction-amount ${t.type}`}>
+                {t.type === 'expense' ? '-' : '+'}{formatCurrency(t.amount)}
+              </span>
+            </div>
           ))}
-        </ul>
+        </div>
       )}
     </div>
   );
