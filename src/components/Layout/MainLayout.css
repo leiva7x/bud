@@ -1,40 +1,25 @@
-/* src/components/Layout/MainLayout.css */
-
 .main-layout {
   display: flex;
   flex-direction: column;
-  width: 100%;
   height: 100vh;
 }
 
-.main-content {
+.layout-body {
   display: flex;
   flex: 1;
   overflow: hidden;
 }
 
-.page-container {
+.content {
   flex: 1;
-  display: flex;
-  flex-direction: column;
-  overflow-y: auto;
-  margin-left: 250px;
-  margin-top: 60px;
-}
-
-.content-area {
-  flex: 1;
-  padding: var(--spacing-lg);
+  padding: 2rem;
   overflow-y: auto;
   background-color: var(--bg-secondary);
+  transition: var(--transition);
 }
 
 @media (max-width: 768px) {
-  .page-container {
+  .content.shifted {
     margin-left: 0;
-  }
-  
-  .sidebar {
-    display: none;
   }
 }
