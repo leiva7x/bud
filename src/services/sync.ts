@@ -1,100 +1,20 @@
-// src/services/sync.ts - Offline sync management
+export const syncService = {
+  // Revisa si estamos conectados a la red
+  isOnline: () => window.navigator.onLine,
 
-import { storage } from './storage';
+  // Escucha cambios en la conexión
+  subscribeToNetworkStatus: (callback: (isOnline: boolean) => void) => {
+    window.addEventListener('online', () => callback(true));
+    window.addEventListener('offline', () => callback(false));
+  },
 
-interface SyncQueue {
-  id: string;
-  action: 'create' | 'update' | 'delete';
-  entityType: 'transaction' | 'budget' | 'debt';
-  data: any;
-  timestamp: number;
-  synced: boolean;
-}
-
-export class SyncService {
-  private queueKey = 'sync_queue';
-
-  addToQueue(action: SyncQueue['action'], entityType: SyncQueue['entityType'], data: any): void {
-    const queue = this.getQueue();
-    const item: SyncQueue = {
-      id: `${Date.now()}-${Math.random()}`,
-      action,
-      entityType,
-      data,
-      timestamp: Date.now(),
-      synced: false,
-    };
-    queue.push(item);
-    storage.set(this.queueKey, queue);
-  }
-
-  getQueue(): SyncQueue[] {
-    return storage.get<SyncQueue[]>(this.queueKey) || [];
-  }
-
-  getPendingQueue(): SyncQueue[] {
-    return this.getQueue().filter((item) => !item.synced);
-  }
-
-  markAsSynced(id: string): void {
-    const queue = this.getQueue();
-    const item = queue.find((item) => item.id === id);
-    if (item) {
-      item.synced = true;
-      storage.set(this.queueKey, queue);
+  // Aquí es donde iría la lógica para enviar datos a una API en el futuro
+  pushToCloud: async (action: string, data: any) => {
+    if (!window.navigator.onLine) {
+      console.log('Guardando acción en cola local hasta que haya internet...');
+      // Lógica de cola (queue) simplificada para esta fase
+      return false;
     }
+    return true;
   }
-
-  clearSyncedItems(): void {
-    const queue = this.getQueue().filter((item) => !item.synced);
-    storage.set(this.queueKey, queue);
-  }
-
-  clearQueue(): void {
-    storage.remove(this.queueKey);
-  }
-
-  getSyncStatus(): { pending: number; synced: number; total: number } {
-    const queue = this.getQueue();
-    const synced = queue.filter((item) => item.synced).length;
-    return {
-      pending: queue.filter((item) => !item.synced).length,
-      synced,
-      total: queue.length,
-    };
-  }
-}
-
-export const syncService = new SyncService();
-
-// Online/Offline detection
-export class OfflineDetector {
-  private isOnlineKey = 'is_online';
-  private listeners: Set<(isOnline: boolean) => void> = new Set();
-
-  constructor() {
-    window.addEventListener('online', () => this.setOnline(true));
-    window.addEventListener('offline', () => this.setOnline(false));
-    this.setOnline(navigator.onLine);
-  }
-
-  private setOnline(isOnline: boolean): void {
-    storage.set(this.isOnlineKey, isOnline);
-    this.notify(isOnline);
-  }
-
-  private notify(isOnline: boolean): void {
-    this.listeners.forEach((listener) => listener(isOnline));
-  }
-
-  isOnline(): boolean {
-    return storage.get<boolean>(this.isOnlineKey) ?? navigator.onLine;
-  }
-
-  subscribe(listener: (isOnline: boolean) => void): () => void {
-    this.listeners.add(listener);
-    return () => this.listeners.delete(listener);
-  }
-}
-
-export const offlineDetector = new OfflineDetector();
+};
