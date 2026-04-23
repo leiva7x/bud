@@ -1,29 +1,19 @@
-// src/components/Layout/MainLayout.tsx
-
 import React, { useState } from 'react';
-import { Menu, X } from 'lucide-react';
 import Header from './Header';
 import Sidebar from './Sidebar';
-import Dashboard from '../Dashboard/Dashboard';
 import './MainLayout.css';
 
-const MainLayout: React.FC = () => {
-  const [sidebarOpen, setSidebarOpen] = useState(true);
-
-  const toggleSidebar = () => {
-    setSidebarOpen(!sidebarOpen);
-  };
+const MainLayout: React.FC<{ children: React.ReactNode }> = ({ children }) => {
+  const [isSidebarOpen, setSidebarOpen] = useState(true);
 
   return (
     <div className="main-layout">
-      <Header onMenuClick={toggleSidebar} />
-      <div className="main-content">
-        {sidebarOpen && <Sidebar />}
-        <div className="page-container">
-          <div className="content-area">
-            <Dashboard />
-          </div>
-        </div>
+      <Header onMenuClick={() => setSidebarOpen(!isSidebarOpen)} />
+      <div className="layout-body">
+        <Sidebar isOpen={isSidebarOpen} />
+        <main className={`content ${isSidebarOpen ? 'shifted' : ''}`}>
+          {children}
+        </main>
       </div>
     </div>
   );
