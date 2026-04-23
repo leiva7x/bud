@@ -1,46 +1,32 @@
-// src/components/Dashboard/BudgetProgress.tsx
-
 import React from 'react';
-import { Budget } from '../../types';
-import { formatCurrency, formatPercentage } from '../../utils/formatting';
+import { useBudgetStore } from '../../store/budgetStore';
+import { getBudgetProgress } from '../../utils/calculations';
 import './BudgetProgress.css';
 
-interface BudgetProgressProps {
-  budget: Budget;
-}
+const BudgetProgress: React.FC = () => {
+  const { budgets } = useBudgetStore();
 
-const BudgetProgress: React.FC<BudgetProgressProps> = ({ budget }) => {
   return (
-    <div className="budget-progress">
-      <h3>Budget Status</h3>
-      
-      <div className="budget-info">
-        <p className="label">Total Allocated: {formatCurrency(budget.totalAllocated)}</p>
-        <p className="label">Total Spent: {formatCurrency(budget.totalSpent)}</p>
-        <p className="label">Remaining: {formatCurrency(budget.totalAllocated - budget.totalSpent)}</p>
-      </div>
-      
-      <div className="allocations">
-        {budget.allocations.map((allocation) => (
-          <div key={allocation.category} className="allocation-item">
-            <div className="allocation-header">
-              <p className="category">{allocation.category}</p>
-              <p className="percentage">{formatPercentage(allocation.percentage)}</p>
+    <div className="budget-progress-container">
+      <h3>Budget Tracking</h3>
+      {budgets.length === 0 ? (
+        <p className="empty-state">No budgets set for this month.</p>
+      ) : (
+        budgets.map(budget => {
+          const progress = getBudgetProgress(budget.spent, budget.limit);
+          return (
+            <div key={budget.id} className="budget-item">
+              <div className="budget-info">
+                <span>{budget.category}</span>
+                <span>{progress.toFixed(0)}%</span>
+              </div>
+              <div className="progress-bar-bg">
+                <div className="progress-bar-fill" style={{ width: `${progress}%` }}></div>
+              </div>
             </div>
-            <div className="progress-bar">
-              <div
-                className="progress-fill"
-                style={{
-                  width: `${Math.min(100, (allocation.spent / allocation.allocated) * 100)}%`,
-                }}
-              />
-            </div>
-            <p className="spent-info">
-              {formatCurrency(allocation.spent)} / {formatCurrency(allocation.allocated)}
-            </p>
-          </div>
-        ))}
-      </div>
+          );
+        })
+      )}
     </div>
   );
 };
