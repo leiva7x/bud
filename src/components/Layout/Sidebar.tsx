@@ -1,38 +1,29 @@
-// src/components/Layout/Sidebar.tsx
-
 import React from 'react';
-import {
-  Home,
-  CreditCard,
-  TrendingDown,
-  PieChart,
-  Settings,
-  HelpCircle,
-} from 'lucide-react';
+import { NavLink } from 'react-router-dom';
+import { LayoutDashboard, Receipt, PieChart, Wallet, Settings } from 'lucide-react';
 import './Sidebar.css';
 
-const Sidebar: React.FC = () => {
+const Sidebar: React.FC<{ isOpen: boolean }> = ({ isOpen }) => {
   const menuItems = [
-    { icon: Home, label: 'Dashboard', href: '#/' },
-    { icon: CreditCard, label: 'Transactions', href: '#/transactions' },
-    { icon: PieChart, label: 'Budget', href: '#/budget' },
-    { icon: TrendingDown, label: 'Debt Planner', href: '#/debt' },
-    { icon: Settings, label: 'Settings', href: '#/settings' },
-    { icon: HelpCircle, label: 'Help', href: '#/help' },
+    { path: '/', icon: <LayoutDashboard size={20} />, label: 'Dashboard' },
+    { path: '/transactions', icon: <Receipt size={20} />, label: 'Transactions' },
+    { path: '/budget', icon: <PieChart size={20} />, label: 'Budget' },
+    { path: '/debt', icon: <Wallet size={20} />, label: 'Debt Planner' },
+    { path: '/settings', icon: <Settings size={20} />, label: 'Settings' },
   ];
 
   return (
-    <aside className="sidebar">
+    <aside className={`sidebar ${isOpen ? 'open' : 'closed'}`}>
       <nav className="sidebar-nav">
         {menuItems.map((item) => (
-          <a
-            key={item.label}
-            href={item.href}
-            className="nav-item"
+          <NavLink 
+            key={item.path} 
+            to={item.path} 
+            className={({ isActive }) => `nav-item ${isActive ? 'active' : ''}`}
           >
-            <item.icon size={20} />
-            <span>{item.label}</span>
-          </a>
+            <span className="icon">{item.icon}</span>
+            {isOpen && <span className="label">{item.label}</span>}
+          </NavLink>
         ))}
       </nav>
     </aside>
